@@ -18,6 +18,8 @@ Interactive demo of Mozilla's code-submission pipeline.
     A new browser with an empty profile will open.  If you don't want to use
     the script, configure your browser to use the demo SOCKS proxy, available
     on port 1080 of your Docker host's IP.
+    *Hint:* If you happen to not have the `firefox` command you can set the 
+    FIREFOX_CMD=path/to/firefox and `firefox-proxy` will use it.
  1. Visit `http://phabricator.test` in the new browser window and log in
     with `user:phab` and `password:phab` to work with your new review.
 
