@@ -25,6 +25,14 @@ Interactive demo of Mozilla's code-submission pipeline.
  1. Visit `http://lando-ui.test` For full Lando experience.
  1. Visit `http://lando-api.test` to use Lando API via Swagger UI.
 
+## Running apps from local repositories
+
+Each app has a corresponding Docker Compose configuration file. You can specify which app needs to run from a local repository. To run a local version of Phabricator please run:
+
+`docker-compose -f docker-compose.yml -f docker-compose.phabricator.yml run demo`
+
+You can specify all configuration files in one command. The only rule is to have the `-f docker-compose.yml` as the first one.
+
 ## Preconfigured users:
 
 For performing administration tasks in Phabricator, first log out of Phabricator and then go to:

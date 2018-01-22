@@ -32,6 +32,7 @@ RUN mkdir -p phabricator \
     && git clone https://github.com/phacility/libphutil.git \
     && git clone https://github.com/phacility/arcanist.git 
 
+COPY gitconfig .gitconfig
 COPY arcrc .arcrc
 RUN chmod 600 .arcrc \
     && echo "export PATH=/home/phab/phabricator/arcanist/bin:\$PATH" >> .bash_profile \
