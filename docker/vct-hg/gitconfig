@@ -1,3 +1,5 @@
 [user]
-  email = conduit@mozilla.bugs
-  name = Conduit Test User
+	email = conduit@mozilla.bugs
+	name = Conduit User
+[core]
+	editor = vim

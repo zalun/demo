@@ -2,40 +2,46 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-FROM alpine:3.3
+FROM debian:jessie-slim
 
-ENV HG_RELEASE=4.1 \
+ENV HG_RELEASE=4.4 \
     VCT_VERSION=tip
 
 # Build/install dependencies
-RUN apk --no-cache add python ca-certificates curl bash php-cli php-curl php-json git
-RUN apk --no-cache add --virtual build-dependencies \
-      build-base \
-      python-dev \
-      py-pip \
-    && pip install --no-cache simplejson \
-    && pip install --no-cache mercurial==$HG_RELEASE \
-    && apk del build-dependencies
+RUN apt-get update
+RUN apt-get install -y python ca-certificates curl bash php5-common php5-cli php5-curl php5-json git build-essential python-pip python-dev git vim
+RUN pip install simplejson \
+    && pip install mercurial==4.5
 
 # add a non-privileged user
-RUN addgroup -g 1000 phab && adduser -D -u 1000 -G phab -s /bin/bash phab
+RUN addgroup --gid 1000 phab \
+    && adduser --uid 1000 --ingroup phab --shell /bin/bash phab
 
 WORKDIR /home/phab
 
 RUN hg clone https://hg.mozilla.org/hgcustom/version-control-tools -r $VCT_VERSION
 COPY arcconfig version-control-tools/.arcconfig
 
-COPY hgrc .hgrc
+RUN git clone https://github.com/glandium/git-cinnabar.git --branch next --single-branch
+COPY cinnabar.patch git-cinnabar
+RUN cd git-cinnabar && patch -p1 cinnabar.patch && cd ..
+ENV PATH="${PATH}:/home/phab/git-cinnabar"
+RUN git cinnabar download
+RUN git clone hg::https://hg.mozilla.org/hgcustom/version-control-tools vct-cinnabar
+COPY arcconfig vct-cinnabar/.arcconfig
 
-# Install Arcanist
+COPY hgrc .hgrc
+COPY gitconfig .gitconfig
+
+# Install forked Arcanist.
 RUN mkdir -p phabricator \
     && cd phabricator \
     && git clone https://github.com/phacility/libphutil.git \
-    && git clone https://github.com/phacility/arcanist.git 
+    && git clone https://github.com/zalun/arcanist.git --branch cinnabarc --single-branch
 
 COPY arcrc .arcrc
 RUN chmod 600 .arcrc \
-    && echo "export PATH=/home/phab/phabricator/arcanist/bin:\$PATH" >> .bash_profile \
+    && echo "export PATH=/home/phab/phabricator/arcanist/bin:/home/phab/git-cinnabar:\$PATH" >> .bash_profile \
     && echo "export EDITOR=vi" >> .bash_profile \
     && chown -R phab:phab /home/phab
 
